@@ -9,7 +9,15 @@ const Navbar = () => {
 
         const [visible, setVisible] = useState(false);
 
-        const {setShowSearch, getCartCount} = useContext(ShopContext)
+        const {setShowSearch,  getCartCount, navigate, token, setToken, setCartItems, wishlistItems} = useContext(ShopContext)
+
+        const logout = () => {
+            navigate('/login')
+            localStorage.removeItem('token')
+            localStorage.removeItem('cartItems')
+            setToken('')
+            setCartItems({})
+        }
 
 
   return (
@@ -39,25 +47,36 @@ const Navbar = () => {
         <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
      </NavLink>
 
+      <NavLink to='/wishlist' className='flex flex-col items-center gap-1'>
+        <p>WISHLIST</p>
+        <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
+     </NavLink>
+
          </ul>
 
          <div className='flex items-center gap-6'>
             <img onClick={() => setShowSearch(true)} src={assets.search_icon} className='w-5 cursor-pointer'  alt="" />
 
             <div className='group relative'>
-                <Link to='/login'><img className='w-5 cursor-pointer' src={assets.profile_icon} alt="" /></Link>
-                <div className='group-hover:block hidden absolute dropdown-menu right-0 pt-4'>
+                <img onClick={() => token ? null : navigate('/login')} className='w-5 cursor-pointer' src={assets.profile_icon} alt="" />
+
+                {/*-------- Dropdown Menu -------*/}
+                {token && <div className='group-hover:block hidden absolute dropdown-menu right-0 pt-4'>
                     <div className='flex flex-col gap-2 w-36 py-3 px-5 bg-slate-100 text-gray-500 rounded '>
                 <p className='cursor-pointer hover:text-black'>My Profile</p>
-                <p className='cursor-pointer hover:text-black'>Orders</p>
-                <p className='cursor-pointer hover:text-black'>Logout</p>
+                <p onClick={()=>navigate('/orders')} className='cursor-pointer hover:text-black'>Orders</p>
+                <p onClick={logout} className='cursor-pointer hover:text-black'>Logout</p>
                     </div>
-                </div>
+                </div>}
             </div>
             <Link to='/cart' className='relative'>
                 <img className='w-5 min-w-5' src={assets.cart_icon} alt="" />
                 <p className='absolute -right-1.25 -bottom-1.25 w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]'>{getCartCount()}</p>
             </Link>
+            <button onClick={() => navigate('/wishlist')} className='relative text-sm text-gray-700 cursor-pointer'>
+                Wish
+                <span className='absolute -right-3 -top-2 min-w-4 px-1 text-center leading-4 bg-black text-white rounded-full text-[8px]'>{wishlistItems.length}</span>
+            </button>
             <img onClick={() => setVisible(true)} src={assets.menu_icon} className='w-5 cursor-pointer sm:hidden' alt="" />
        </div>
 
@@ -79,6 +98,9 @@ const Navbar = () => {
         </NavLink>
         <NavLink onClick={() => setVisible(false)} to='/contact' className='py-2 pl-6 border'>
             <p>CONTACT</p>
+        </NavLink>
+        <NavLink onClick={() => setVisible(false)} to='/wishlist' className='py-2 pl-6 border'>
+            <p>WISHLIST</p>
         </NavLink>
             </div>
        </div>

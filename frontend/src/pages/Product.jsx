@@ -14,6 +14,8 @@ const Product = () => {
   const [productData,SetProductData] = useState(false)
   const [image,setImage] = useState('')
   const [size,setSize] = useState('')
+  const availableStock = productData?.stockQuantity ?? 10
+  const isOutOfStock = productData && Number(availableStock) <= 0
 
   const fetchProductData = async () => {
 
@@ -61,6 +63,9 @@ const Product = () => {
               <p className="pl-2">(122)</p>
               </div>
               <p className="mt-5 text-3xl font-medium">{currency}{productData.price}</p>
+              <p className={`mt-2 text-sm font-medium ${isOutOfStock ? "text-red-500" : "text-green-600"}`}>
+                {isOutOfStock ? "Out of stock" : `${availableStock} items available`}
+              </p>
               <p className="mt-5 text-gray-500 md:w-3/4">{productData.description}</p>
               <div className="flex flex-col gap-4 my-8">
                 <p>Select Size</p>
@@ -70,7 +75,7 @@ const Product = () => {
                     ))}
                 </div>
               </div>
-              <button onClick={() => addToCart(productData._id,size)} className="bg-black text-white px-8 py-3 text-sm active:bg-gray-700">ADD TO CART</button>
+              <button disabled={isOutOfStock} onClick={() => addToCart(productData._id,size)} className="bg-black text-white px-8 py-3 text-sm active:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed">ADD TO CART</button>
               <hr className="mt-8 sm:w-4/5" />
               <div className="text-sm text-gray-500 mt-5 flex flex-col gap-1">
                 <p>100% Orginal product</p>
