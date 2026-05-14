@@ -87,17 +87,35 @@ const ShopContextProvider = (props) => {
   };
 
   const toggleWishlist = (itemId) => {
-    setWishlistItems((prev) => {
-      const updatedWishlist = prev.includes(itemId)
-        ? prev.filter((id) => id !== itemId)
-        : [...prev, itemId];
+    const wasInWishlist = wishlistItems.includes(itemId);
+    const updatedWishlist = wasInWishlist
+      ? wishlistItems.filter((id) => id !== itemId)
+      : [...wishlistItems, itemId];
 
-      toast.success(
-        prev.includes(itemId) ? "Removed from wishlist" : "Added to wishlist",
-      );
+    setWishlistItems(updatedWishlist);
+    toast.success(wasInWishlist ? "Removed from wishlist" : "Added to wishlist");
 
-      return updatedWishlist;
-    });
+    if (token) {
+      axios
+        .post(
+          backendUrl + "/api/user/wishlist/toggle",
+          { itemId },
+          { headers: { token } },
+        )
+        .then((response) => {
+          if (response.data.success) {
+            setWishlistItems(response.data.wishlistData || []);
+          } else {
+            setWishlistItems(wishlistItems);
+            toast.error(response.data.message);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          setWishlistItems(wishlistItems);
+          toast.error(error.message);
+        });
+    }
   };
 
   const isInWishlist = (itemId) => wishlistItems.includes(itemId);
@@ -168,6 +186,23 @@ const ShopContextProvider = (props) => {
     }
   }
 
+  const getUserWishlist = async (token) => {
+    try {
+      const response = await axios.post(
+        backendUrl + "/api/user/wishlist",
+        {},
+        { headers: { token } },
+      );
+
+      if (response.data.success) {
+        setWishlistItems(response.data.wishlistData || []);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+    }
+  };
+
   useEffect(() => {
     getProductsData();
   }, []);
@@ -175,6 +210,7 @@ const ShopContextProvider = (props) => {
   useEffect(() => {
      if (token) {
         getUserCart(token)
+        getUserWishlist(token)
      }
   }, [token]);
 
@@ -199,6 +235,7 @@ const ShopContextProvider = (props) => {
     wishlistItems,
     addToCart,
     setCartItems,
+    setWishlistItems,
     toggleWishlist,
     isInWishlist,
     getCartCount,
